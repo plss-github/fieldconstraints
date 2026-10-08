@@ -8,7 +8,6 @@
  * goes through GlpiPlugin\Fieldconstraints\Compat.
  */
 
-use Glpi\Plugin\Hooks;
 use GlpiPlugin\Fieldconstraints\ActionBlock;
 use GlpiPlugin\Fieldconstraints\ActionRule;
 use GlpiPlugin\Fieldconstraints\Compat;
@@ -53,6 +52,10 @@ function plugin_init_fieldconstraints(): void
 {
     global $PLUGIN_HOOKS;
 
+    // Hook names are written as strings, not Glpi\Plugin\Hooks constants: some
+    // constants (MENU_TOADD...) only exist from GLPI 10.0.20 on, and an undefined
+    // one stops the plugin from loading on older 10.0.x.
+
     // Required by GLPI 10 for the plugin's own POST forms; ignored by GLPI 11.
     $PLUGIN_HOOKS['csrf_compliant']['fieldconstraints'] = true;
 
@@ -82,13 +85,13 @@ function plugin_init_fieldconstraints(): void
     //
     // Plugin::doHook() keys on the exact class name, so every concrete class is
     // listed -- TicketTask rather than CommonITILTask.
-    $PLUGIN_HOOKS[Hooks::PRE_ITEM_UPDATE]['fieldconstraints'] = [
+    $PLUGIN_HOOKS['pre_item_update']['fieldconstraints'] = [
         'Ticket'  => [Enforcer::class, 'preItilUpdate'],
         'Change'  => [Enforcer::class, 'preItilUpdate'],
         'Problem' => [Enforcer::class, 'preItilUpdate'],
     ];
 
-    $PLUGIN_HOOKS[Hooks::PRE_ITEM_ADD]['fieldconstraints'] = [
+    $PLUGIN_HOOKS['pre_item_add']['fieldconstraints'] = [
         'ITILSolution' => [Enforcer::class, 'preSolutionAdd'],
         'ITILFollowup' => [Enforcer::class, 'preTimelineAdd'],
         'TicketTask'   => [Enforcer::class, 'preTimelineAdd'],
@@ -104,24 +107,24 @@ function plugin_init_fieldconstraints(): void
     // container and itemtype, not through the item: those classes get the
     // date-constraint hooks.
     foreach (DateEnforcer::watchedFieldsClasses() as $class) {
-        $PLUGIN_HOOKS[Hooks::PRE_ITEM_ADD]['fieldconstraints'][$class]    = [DateEnforcer::class, 'preFieldsValues'];
-        $PLUGIN_HOOKS[Hooks::PRE_ITEM_UPDATE]['fieldconstraints'][$class] = [DateEnforcer::class, 'preFieldsValues'];
+        $PLUGIN_HOOKS['pre_item_add']['fieldconstraints'][$class]    = [DateEnforcer::class, 'preFieldsValues'];
+        $PLUGIN_HOOKS['pre_item_update']['fieldconstraints'][$class] = [DateEnforcer::class, 'preFieldsValues'];
     }
 
-    $PLUGIN_HOOKS[Hooks::ITEM_ADD]['fieldconstraints'] = [
+    $PLUGIN_HOOKS['item_add']['fieldconstraints'] = [
         'ITILSolution' => [Enforcer::class, 'solutionAdded'],
     ];
 
     if (Session::getLoginUserID()) {
         // Notice above the solution button and red `*` on required labels.
-        $PLUGIN_HOOKS[Hooks::POST_ITEM_FORM]['fieldconstraints'] = [FormHints::class, 'postItemForm'];
+        $PLUGIN_HOOKS['post_item_form']['fieldconstraints'] = [FormHints::class, 'postItemForm'];
 
         // GLPI 10 resolves the path from the plugin root (and checks the file
         // exists, so it must stay a bare path); GLPI 11 serves public/ at the
         // plugin URL. The browser cache key GLPI adds is the plugin version, so on
         // GLPI 11 the file's mtime is added too: a changed script is never served
         // stale. On GLPI 10, bump the version on every release.
-        $PLUGIN_HOOKS[Hooks::ADD_JAVASCRIPT]['fieldconstraints'][] = Compat::isLegacy()
+        $PLUGIN_HOOKS['add_javascript']['fieldconstraints'][] = Compat::isLegacy()
             ? 'public/fieldconstraints.js'
             : 'fieldconstraints.js?m=' . (int) @filemtime(__DIR__ . '/public/fieldconstraints.js');
     }
@@ -135,7 +138,7 @@ function plugin_init_fieldconstraints(): void
     }
 
     if (Session::getLoginUserID() && Session::haveRight('config', READ)) {
-        $PLUGIN_HOOKS[Hooks::CONFIG_PAGE]['fieldconstraints'] = 'front/actionblock.php';
-        $PLUGIN_HOOKS[Hooks::MENU_TOADD]['fieldconstraints']  = ['config' => ActionBlock::class];
+        $PLUGIN_HOOKS['config_page']['fieldconstraints'] = 'front/actionblock.php';
+        $PLUGIN_HOOKS['menu_toadd']['fieldconstraints']  = ['config' => ActionBlock::class];
     }
 }
