@@ -2,8 +2,9 @@
  # Item rule form (ActionRule), on core's form components so it looks and
  # behaves like any GLPI form on 10 and 11 (header, CSRF, buttons, dates).
  #
- # Widgets core has no macro for (multiple category dropdown, field list with
- # its picker configuration, refresh script) arrive pre-rendered from PHP.
+ # Widgets core has no macro for (filters summary, field list with its picker
+ # configuration, refresh script) arrive pre-rendered from PHP. The filters
+ # themselves are edited in the rule's "Filters" tab (RuleFilter).
  #}
 {% import 'components/form/fields_macros.html.twig' as fields %}
 
@@ -14,8 +15,7 @@
 
 {# Pre-rendered HTML must reach the macros as safe markup, hence the captures. #}
 {% set block_html %}{{ block_link|raw }}{% endset %}
-{% set categories_field %}{{ categories_html|raw }}{% endset %}
-{% set ticket_type_field %}{{ ticket_type_html|raw }}{% endset %}
+{% set filters_field %}{{ filters_html|raw }}{% endset %}
 {% set required_field %}{{ required_html|raw }}{% endset %}
 
 <div class="asset">
@@ -34,13 +34,7 @@
                      'rand': rand,
                   }) }}
 
-                  {{ fields.field('itilcategories', categories_field, labels.categories, {
-                     'helper': labels.categories_help,
-                  }) }}
-
-                  {{ fields.field('ticket_type', ticket_type_field, labels.ticket_type, {
-                     'helper': labels.ticket_type_help,
-                  }) }}
+                  {{ fields.field('_filters', filters_field, labels.filters) }}
 
                   {{ fields.dropdownYesNo('is_active', item.fields['is_active'], labels.active) }}
 

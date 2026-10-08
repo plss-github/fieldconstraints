@@ -1,147 +1,156 @@
 # Field Constraints - Brazilian Portuguese
 msgid ""
 msgstr ""
-"Project-Id-Version: fieldconstraints 1.0.0\n"
+"Project-Id-Version: fieldconstraints 1.1.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-07 09:51-0300\n"
+"POT-Creation-Date: 2026-10-08 10:55-0300\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: src/FieldCatalog.php:56
-msgid "Category"
-msgstr "Categoria"
+#: setup.php:32
+msgid "Field Constraints"
+msgstr "Restrições de Campos"
 
-#: src/FieldCatalog.php:57
-msgid "Location"
-msgstr "Localização"
+#: src/ActionBlock.php:34
+msgid "Action rule"
+msgid_plural "Action rules"
+msgstr[0] "Regra de ação"
+msgstr[1] "Regras de ação"
 
-#: src/FieldCatalog.php:58
-msgid "Request source"
-msgstr "Origem da requisição"
+#: src/ActionBlock.php:62 src/ActionBlock.php:198
+msgid "Action"
+msgstr "Ação"
 
-#: src/FieldCatalog.php:59
-msgid "Description"
-msgstr "Descrição"
+#: src/ActionBlock.php:67 src/ActionBlock.php:208 src/ActionRule.php:257
+#: src/ActionRule.php:366 src/DateConstraint.php:446
+msgid "Active"
+msgstr "Ativa"
 
-#: src/FieldCatalog.php:60
-msgid "Time to resolve"
-msgstr "Tempo para solução"
+#: src/ActionBlock.php:83
+msgid "Fixed while the block has item rules."
+msgstr "Fixa enquanto o bloco tiver regras por item."
 
-#: src/FieldCatalog.php:61
-msgid "Total duration (at least one timed task)"
-msgstr "Duração total (ao menos uma tarefa com tempo)"
+#: src/ActionBlock.php:97
+msgid "Invalid item or action."
+msgstr "Item ou ação inválidos."
 
-#: src/FieldCatalog.php:62
-msgid "Requester"
-msgstr "Requerente"
+#: src/ActionBlock.php:181
+msgid "Solve"
+msgstr "Solucionar"
 
-#: src/FieldCatalog.php:63
-msgid "Requester group"
-msgstr "Grupo requerente"
+#: src/ActionBlock.php:182
+msgid "Close"
+msgstr "Fechar"
 
-#: src/FieldCatalog.php:64
-msgid "Observer"
-msgstr "Observador"
+#: src/ActionBlock.php:183
+msgid "Put on hold (pending)"
+msgstr "Pendenciar"
 
-#: src/FieldCatalog.php:65
-msgid "Assigned technician"
-msgstr "Técnico atribuído"
-
-#: src/FieldCatalog.php:66
-msgid "Assigned group"
-msgstr "Grupo atribuído"
-
-#: src/FieldCatalog.php:67
-msgid "Assigned supplier"
-msgstr "Fornecedor atribuído"
-
-#: src/FieldCatalog.php:68
-msgid "Associated item"
-msgstr "Item associado"
-
-#: src/FieldCatalog.php:69
-msgid "At least one task"
-msgstr "Ao menos uma tarefa"
-
-#: src/FieldCatalog.php:70
-msgid "All tasks done"
-msgstr "Todas as tarefas concluídas"
-
-#: src/FieldCatalog.php:71
-msgid "At least one followup"
-msgstr "Ao menos um acompanhamento"
-
-#: src/FieldCatalog.php:72
-msgid "At least one document"
-msgstr "Ao menos um documento"
-
-#: src/FieldCatalog.php:73
-msgid "Approval accepted"
-msgstr "Aprovação concedida"
-
-#: src/FieldCatalog.php:89
-msgid "Solution type"
-msgstr "Tipo de solução"
-
-#: src/FieldCatalog.php:90
-msgid "Solution description"
-msgstr "Descrição da solução"
-
-#: src/FieldCatalog.php:91
-msgid "Solution attachment"
-msgstr "Anexo da solução"
-
-#: src/FieldCatalog.php:119
-msgid "Item fields"
-msgstr "Campos do item"
-
-#: src/FieldCatalog.php:126
-msgid "Solution"
-msgstr "Solução"
-
-#: src/FieldCatalog.php:130
+#: src/ActionBlock.php:184
 #, php-format
-msgid "Additional fields - %s"
-msgstr "Campos adicionais - %s"
+msgid "Change status to \"%s\""
+msgstr "Mudar status para \"%s\""
 
-#: src/FieldCatalog.php:172
+#: src/ActionBlock.php:216 src/ActionRule.php:37
+msgid "Item rule"
+msgid_plural "Item rules"
+msgstr[0] "Regra por item"
+msgstr[1] "Regras por item"
+
+#: src/ActionRule.php:117 src/ActionRule.php:294
+msgid "Choose the block of the rule."
+msgstr "Escolha o bloco da regra."
+
+#: src/ActionRule.php:140
+msgid "This item has no such action."
+msgstr "Este item não tem essa ação."
+
+#: src/ActionRule.php:164
 #, php-format
-msgid "Additional field #%d (removed)"
-msgstr "Campo adicional #%d (removido)"
+msgid ""
+"\"%s\" does not apply to this item or action and was removed from the rule."
+msgstr "\"%s\" não se aplica a este item ou ação e foi retirado da regra."
 
-#: src/Enforcer.php:176
+#: src/ActionRule.php:181
+msgid "The rule has no required field: it will not block anything."
+msgstr "A regra não tem nenhum campo exigido: ela não vai bloquear nada."
+
+#: src/ActionRule.php:194
 #, php-format
-msgid "Action \"%1$s\" is not allowed yet (rule \"%2$s\")."
-msgstr "A ação \"%1$s\" ainda não é permitida (regra \"%2$s\")."
+msgid "The filter \"%s\" does not apply to this item: remove it first."
+msgstr "O filtro \"%s\" não se aplica a este item: remova-o antes."
 
-#: src/Enforcer.php:191 src/FormHints.php:76
-msgid "Fill in:"
-msgstr "Preencha:"
+#: src/ActionRule.php:250
+msgid "Add an item rule"
+msgstr "Adicionar regra por item"
 
-#: src/FormHints.php:69
-msgid "(fill in on the item and save it first)"
-msgstr "(preencha no item e salve antes)"
+#: src/ActionRule.php:254 src/ActionRule.php:364 src/RuleFilter.php:83
+msgid "Item"
+msgstr "Item"
 
-#: src/FormHints.php:179
+#: src/ActionRule.php:256
+msgid "Required fields"
+msgstr "Campos exigidos"
+
+#: src/ActionRule.php:262
+msgid "No item rule yet: this block blocks nothing."
+msgstr "Nenhuma regra por item ainda: este bloco não bloqueia nada."
+
+#: src/ActionRule.php:315
+msgid ""
+"Save the rule, then add filters in the \"Filters\" tab. No filter = every "
+"item."
+msgstr ""
+"Salve a regra e adicione os filtros na aba \"Filtros\". Sem filtro = todos "
+"os itens."
+
+#: src/ActionRule.php:325
+msgid "Edit filters"
+msgstr "Editar filtros"
+
+#: src/ActionRule.php:367
+msgid "Custom message"
+msgstr "Mensagem personalizada"
+
+#: src/ActionRule.php:368
+msgid "Fields required to allow the action"
+msgstr "Campos exigidos para permitir a ação"
+
+#: src/ActionRule.php:395
+msgid "Unavailable"
+msgstr "Indisponíveis"
+
+#: src/ActionRule.php:409
+msgid ""
+"Requirements without a field of their own (tasks, followups...) are only in "
+"the list."
+msgstr ""
+"Exigências sem campo próprio (tarefas, acompanhamentos...) ficam só na lista."
+
+#: src/ActionRule.php:451
 #, php-format
-msgid "Required to: %s"
-msgstr "Obrigatório para: %s"
+msgid "Select the fields on the form - %s"
+msgstr "Selecionar os campos no formulário - %s"
 
-#: src/FormEngine.php:39
-msgid "GLPI forms"
-msgstr "Formulários do GLPI"
+#: src/ActionRule.php:467
+msgid "Sample item ID"
+msgstr "ID do item de exemplo"
 
-#: src/FormEngine.php:40
-msgid "No form engine available"
-msgstr "Nenhum motor de formulários disponível"
+#: src/ActionRule.php:470
+msgid "Load"
+msgstr "Carregar"
 
-#: src/FormEngine.php:71
-#, php-format
-msgid "Form #%d (removed)"
-msgstr "Formulário #%d (removido)"
+#: src/ActionRule.php:473
+msgid ""
+"Click a field to require it, click again to remove it. Fields of other tabs: "
+"open the tab in the form. Nothing is saved on the item; save the rule above."
+msgstr ""
+"Clique em um campo para exigi-lo e clique de novo para retirar. Campos de "
+"outras abas: abra a aba no formulário. Nada é salvo no item; salve a regra "
+"acima."
 
 #: src/DateConstraint.php:40
 msgid "Date constraint"
@@ -209,11 +218,6 @@ msgstr "Este formulário não tem pergunta de data."
 msgid "Constraint"
 msgstr "Restrição"
 
-#: src/DateConstraint.php:446 src/ActionBlock.php:67 src/ActionBlock.php:208
-#: src/ActionRule.php:243 src/ActionRule.php:336
-msgid "Active"
-msgstr "Ativa"
-
 #: src/DateConstraint.php:452
 msgid "No constraint yet."
 msgstr "Nenhuma restrição ainda."
@@ -246,162 +250,279 @@ msgstr "Outro campo"
 msgid "Add"
 msgstr "Adicionar"
 
-#: src/ActionBlock.php:34
-msgid "Action rule"
-msgid_plural "Action rules"
-msgstr[0] "Regra de ação"
-msgstr[1] "Regras de ação"
-
-#: src/ActionBlock.php:62 src/ActionBlock.php:198
-msgid "Action"
-msgstr "Ação"
-
-#: src/ActionBlock.php:83
-msgid "Fixed while the block has item rules."
-msgstr "Fixa enquanto o bloco tiver regras por item."
-
-#: src/ActionBlock.php:97
-msgid "Invalid item or action."
-msgstr "Item ou ação inválidos."
-
-#: src/ActionBlock.php:181
-msgid "Solve"
-msgstr "Solucionar"
-
-#: src/ActionBlock.php:182
-msgid "Close"
-msgstr "Fechar"
-
-#: src/ActionBlock.php:183
-msgid "Put on hold (pending)"
-msgstr "Pendenciar"
-
-#: src/ActionBlock.php:184
+#: src/Enforcer.php:176
 #, php-format
-msgid "Change status to \"%s\""
-msgstr "Mudar status para \"%s\""
+msgid "Action \"%1$s\" is not allowed yet (rule \"%2$s\")."
+msgstr "A ação \"%1$s\" ainda não é permitida (regra \"%2$s\")."
 
-#: src/ActionBlock.php:216 src/ActionRule.php:37
-msgid "Item rule"
-msgid_plural "Item rules"
-msgstr[0] "Regra por item"
-msgstr[1] "Regras por item"
+#: src/Enforcer.php:191 src/FormHints.php:76
+msgid "Fill in:"
+msgstr "Preencha:"
 
-#: src/ActionRule.php:85
-msgid "All categories"
-msgstr "Todas as categorias"
+#: src/FieldCatalog.php:56 src/RuleFilter.php:89
+msgid "Category"
+msgstr "Categoria"
 
-#: src/ActionRule.php:108 src/ActionRule.php:281
-msgid "Choose the block of the rule."
-msgstr "Escolha o bloco da regra."
+#: src/FieldCatalog.php:57 src/RuleFilter.php:92
+msgid "Location"
+msgstr "Localização"
 
-#: src/ActionRule.php:131
-msgid "This item has no such action."
-msgstr "Este item não tem essa ação."
+#: src/FieldCatalog.php:58 src/RuleFilter.php:91
+msgid "Request source"
+msgstr "Origem da requisição"
 
-#: src/ActionRule.php:160
+#: src/FieldCatalog.php:59
+msgid "Description"
+msgstr "Descrição"
+
+#: src/FieldCatalog.php:60
+msgid "Time to resolve"
+msgstr "Tempo para solução"
+
+#: src/FieldCatalog.php:61
+msgid "Total duration (at least one timed task)"
+msgstr "Duração total (ao menos uma tarefa com tempo)"
+
+#: src/FieldCatalog.php:62 src/RuleFilter.php:97
+msgid "Requester"
+msgstr "Requerente"
+
+#: src/FieldCatalog.php:63 src/RuleFilter.php:98
+msgid "Requester group"
+msgstr "Grupo requerente"
+
+#: src/FieldCatalog.php:64
+msgid "Observer"
+msgstr "Observador"
+
+#: src/FieldCatalog.php:65 src/RuleFilter.php:99
+msgid "Assigned technician"
+msgstr "Técnico atribuído"
+
+#: src/FieldCatalog.php:66 src/RuleFilter.php:100
+msgid "Assigned group"
+msgstr "Grupo atribuído"
+
+#: src/FieldCatalog.php:67
+msgid "Assigned supplier"
+msgstr "Fornecedor atribuído"
+
+#: src/FieldCatalog.php:68
+msgid "Associated item"
+msgstr "Item associado"
+
+#: src/FieldCatalog.php:69
+msgid "At least one task"
+msgstr "Ao menos uma tarefa"
+
+#: src/FieldCatalog.php:70
+msgid "All tasks done"
+msgstr "Todas as tarefas concluídas"
+
+#: src/FieldCatalog.php:71
+msgid "At least one followup"
+msgstr "Ao menos um acompanhamento"
+
+#: src/FieldCatalog.php:72
+msgid "At least one document"
+msgstr "Ao menos um documento"
+
+#: src/FieldCatalog.php:73
+msgid "Approval accepted"
+msgstr "Aprovação concedida"
+
+#: src/FieldCatalog.php:89
+msgid "Solution type"
+msgstr "Tipo de solução"
+
+#: src/FieldCatalog.php:90
+msgid "Solution description"
+msgstr "Descrição da solução"
+
+#: src/FieldCatalog.php:91
+msgid "Solution attachment"
+msgstr "Anexo da solução"
+
+#: src/FieldCatalog.php:119
+msgid "Item fields"
+msgstr "Campos do item"
+
+#: src/FieldCatalog.php:126
+msgid "Solution"
+msgstr "Solução"
+
+#: src/FieldCatalog.php:130
 #, php-format
-msgid ""
-"\"%s\" does not apply to this item or action and was removed from the rule."
-msgstr "\"%s\" não se aplica a este item ou ação e foi retirado da regra."
+msgid "Additional fields - %s"
+msgstr "Campos adicionais - %s"
 
-#: src/ActionRule.php:177
-msgid "The rule has no required field: it will not block anything."
-msgstr "A regra não tem nenhum campo exigido: ela não vai bloquear nada."
+#: src/FieldCatalog.php:172
+#, php-format
+msgid "Additional field #%d (removed)"
+msgstr "Campo adicional #%d (removido)"
 
-#: src/ActionRule.php:236
-msgid "Add an item rule"
-msgstr "Adicionar regra por item"
+#: src/FormEngine.php:39
+msgid "GLPI forms"
+msgstr "Formulários do GLPI"
 
-#: src/ActionRule.php:240 src/ActionRule.php:296
-msgid "Item"
-msgstr "Item"
+#: src/FormEngine.php:40
+msgid "No form engine available"
+msgstr "Nenhum motor de formulários disponível"
 
-#: src/ActionRule.php:241 src/ActionRule.php:311
-msgid "Categories"
-msgstr "Categorias"
+#: src/FormEngine.php:71
+#, php-format
+msgid "Form #%d (removed)"
+msgstr "Formulário #%d (removido)"
 
-#: src/ActionRule.php:242
-msgid "Required fields"
-msgstr "Campos exigidos"
+#: src/FormHints.php:69
+msgid "(fill in on the item and save it first)"
+msgstr "(preencha no item e salve antes)"
 
-#: src/ActionRule.php:248
-msgid "No item rule yet: this block blocks nothing."
-msgstr "Nenhuma regra por item ainda: este bloco não bloqueia nada."
+#: src/FormHints.php:179
+#, php-format
+msgid "Required to: %s"
+msgstr "Obrigatório para: %s"
 
-#: src/ActionRule.php:320
-msgid "Empty = every category. A category includes its subcategories."
-msgstr "Vazio = todas as categorias. Uma categoria inclui suas subcategorias."
+#: src/RuleFilter.php:61
+msgid "Filter"
+msgid_plural "Filters"
+msgstr[0] "Filtro"
+msgstr[1] "Filtros"
 
-#: src/ActionRule.php:322
+#: src/RuleFilter.php:84
+msgid "Actors"
+msgstr "Atores"
+
+#: src/RuleFilter.php:85
+msgid "User performing the action"
+msgstr "Usuário que executa a ação"
+
+#: src/RuleFilter.php:88
+msgid "Entity"
+msgstr "Entidade"
+
+#: src/RuleFilter.php:90
 msgid "Ticket type"
 msgstr "Tipo de chamado"
 
-#: src/ActionRule.php:325
-msgid "All types"
-msgstr "Todos os tipos"
+#: src/RuleFilter.php:93
+msgid "Urgency"
+msgstr "Urgência"
 
-#: src/ActionRule.php:328
-msgid "Ignored for changes and problems."
-msgstr "Ignorado em mudanças e problemas."
+#: src/RuleFilter.php:94
+msgid "Impact"
+msgstr "Impacto"
 
-#: src/ActionRule.php:332
-msgid "Custom message"
-msgstr "Mensagem personalizada"
+#: src/RuleFilter.php:95
+msgid "Priority"
+msgstr "Prioridade"
 
-#: src/ActionRule.php:341
-msgid "Fields required to allow the action"
-msgstr "Campos exigidos para permitir a ação"
+#: src/RuleFilter.php:102
+msgid "User"
+msgstr "Usuário"
 
-#: src/ActionRule.php:374
-msgid "Unavailable"
-msgstr "Indisponíveis"
+#: src/RuleFilter.php:103
+msgid "Group of the user"
+msgstr "Grupo do usuário"
 
-#: src/ActionRule.php:388
+#: src/RuleFilter.php:104
+msgid "Profile of the user"
+msgstr "Perfil do usuário"
+
+#: src/RuleFilter.php:141
+msgid "is"
+msgstr "é"
+
+#: src/RuleFilter.php:142
+msgid "is not"
+msgstr "não é"
+
+#: src/RuleFilter.php:143
+msgid "is in"
+msgstr "está em"
+
+#: src/RuleFilter.php:144
+msgid "is not in"
+msgstr "não está em"
+
+#: src/RuleFilter.php:145
+msgid "is under"
+msgstr "está sob"
+
+#: src/RuleFilter.php:146
+msgid "is not under"
+msgstr "não está sob"
+
+#: src/RuleFilter.php:168
+msgid "All filters must match (AND)"
+msgstr "Todos os filtros forem atendidos (E)"
+
+#: src/RuleFilter.php:169
+msgid "At least one filter must match (OR)"
+msgstr "Ao menos um filtro for atendido (OU)"
+
+#: src/RuleFilter.php:236
+msgid "All items"
+msgstr "Todos os itens"
+
+#: src/RuleFilter.php:239 src/RuleFilter.php:568
+msgid "OR"
+msgstr "OU"
+
+#: src/RuleFilter.php:239 src/RuleFilter.php:568
+msgid "AND"
+msgstr "E"
+
+#: src/RuleFilter.php:466
+msgid "Choose a criterion that applies to the item of the rule."
+msgstr "Escolha um critério que se aplique ao item da regra."
+
+#: src/RuleFilter.php:471
+msgid "Choose an operator."
+msgstr "Escolha um operador."
+
+#: src/RuleFilter.php:487
+msgid "Choose at least one value."
+msgstr "Escolha ao menos um valor."
+
+#: src/RuleFilter.php:490
 msgid ""
-"Requirements without a field of their own (tasks, followups...) are only in "
-"the list."
+"\"is\" and \"is not\" take a single value: use \"is in\" / \"is not in\" for "
+"a list."
 msgstr ""
-"Exigências sem campo próprio (tarefas, acompanhamentos...) ficam só na lista."
+"\"é\" e \"não é\" aceitam um único valor: use \"está em\" / \"não está em\" "
+"para uma lista."
 
-#: src/ActionRule.php:430
-#, php-format
-msgid "Select the fields on the form - %s"
-msgstr "Selecionar os campos no formulário - %s"
+#: src/RuleFilter.php:543
+msgid "The rule applies when"
+msgstr "A regra vale quando"
 
-#: src/ActionRule.php:446
-msgid "Sample item ID"
-msgstr "ID do item de exemplo"
+#: src/RuleFilter.php:556 src/RuleFilter.php:628
+msgid "Criterion"
+msgstr "Critério"
 
-#: src/ActionRule.php:449
-msgid "Load"
-msgstr "Carregar"
+#: src/RuleFilter.php:557 src/RuleFilter.php:632
+msgid "Operator"
+msgstr "Operador"
 
-#: src/ActionRule.php:452
-msgid ""
-"Click a field to require it, click again to remove it. Fields of other tabs: "
-"open the tab in the form. Nothing is saved on the item; save the rule above."
-msgstr "Clique em um campo para exigi-lo e clique de novo para retirar. Campos de outras abas: abra a aba no formulário. Nada é salvo no item; salve a regra acima."
+#: src/RuleFilter.php:558 src/RuleFilter.php:637
+msgid "Values"
+msgstr "Valores"
 
-#, php-format
-#~ msgid "Forms (%s)"
-#~ msgstr "Formulários (%s)"
+#: src/RuleFilter.php:564
+msgid "No filter: the rule applies to every item (within the block's entity)."
+msgstr ""
+"Nenhum filtro: a regra vale para todos os itens (dentro da entidade do "
+"bloco)."
 
-#, php-format
-#~ msgid "Question #%d (removed)"
-#~ msgstr "Pergunta #%d (removida)"
+#: src/RuleFilter.php:580
+msgid "If"
+msgstr "Se"
 
-#, php-format
-#~ msgid "Form: %s"
-#~ msgstr "Formulário: %s"
+#: src/RuleFilter.php:598
+msgid "Add a filter"
+msgstr "Adicionar filtro"
 
-#, php-format
-#~ msgid "%s cannot be before today."
-#~ msgstr "%s não pode ser anterior a hoje."
-
-#, php-format
-#~ msgid "%1$s cannot be after %2$s."
-#~ msgstr "%1$s não pode ser posterior a %2$s."
-
-msgid "Field Constraints"
-msgstr "Restrições de Campos"
+#: src/RuleFilter.php:750
+msgid "Choose the rule of the filter."
+msgstr "Escolha a regra do filtro."

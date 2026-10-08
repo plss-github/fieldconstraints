@@ -19,7 +19,7 @@ function plugin_fieldconstraints_install(): bool
     $sign      = DBConnection::getDefaultPrimaryKeySignOption();
 
     // Action rules: blocks (one action, entity scope) holding item rules (item,
-    // categories, ticket type, required fields, message).
+    // filters, required fields, message).
     $table = 'glpi_plugin_fieldconstraints_actionblocks';
     if (!$DB->tableExists($table)) {
         $DB->doQuery("
@@ -50,8 +50,7 @@ function plugin_fieldconstraints_install(): bool
                 `plugin_fieldconstraints_actionblocks_id` int $sign NOT NULL DEFAULT '0',
                 `itemtype`                          varchar(100) NOT NULL DEFAULT '',
                 `is_active`                         tinyint NOT NULL DEFAULT '1',
-                `itilcategories`                    text,
-                `ticket_type`                       int NOT NULL DEFAULT '0',
+                `filter_logic`                      varchar(3) NOT NULL DEFAULT 'AND',
                 `required_fields`                   text,
                 `message`                           text,
                 `comment`                           text,
@@ -64,6 +63,27 @@ function plugin_fieldconstraints_install(): bool
             ) ENGINE=InnoDB DEFAULT CHARSET = $charset COLLATE = $collation ROW_FORMAT=DYNAMIC;
         ");
     }
+
+    // Filters of item rules ("Filters" tab): criterion, operator, JSON list of ids.
+    $table = 'glpi_plugin_fieldconstraints_rulefilters';
+    if (!$DB->tableExists($table)) {
+        $DB->doQuery("
+            CREATE TABLE `$table` (
+                `id`                                     int $sign NOT NULL AUTO_INCREMENT,
+                `plugin_fieldconstraints_actionrules_id` int $sign NOT NULL DEFAULT '0',
+                `criterion`                              varchar(50) NOT NULL DEFAULT '',
+                `operator`                               varchar(20) NOT NULL DEFAULT 'equals',
+                `filter_values`                          text,
+                `date_creation`                          timestamp NULL DEFAULT NULL,
+                `date_mod`                               timestamp NULL DEFAULT NULL,
+                PRIMARY KEY (`id`),
+                KEY `plugin_fieldconstraints_actionrules_id` (`plugin_fieldconstraints_actionrules_id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET = $charset COLLATE = $collation ROW_FORMAT=DYNAMIC;
+        ");
+    }
+
+    // 1.0 -> 1.1: categories and ticket type of the rule form become filters.
+    plugin_fieldconstraints_migrate_rule_scope($migration);
 
     // Date constraints, attached to Fields containers and to forms.
     $table = 'glpi_plugin_fieldconstraints_dateconstraints';
@@ -93,6 +113,62 @@ function plugin_fieldconstraints_install(): bool
     return true;
 }
 
+/**
+ * Turns the 1.0 scope columns of item rules (`itilcategories`, `ticket_type`)
+ * into filters with the same meaning (AND), then drops them.
+ */
+function plugin_fieldconstraints_migrate_rule_scope(Migration $migration): void
+{
+    global $DB;
+
+    $rules   = 'glpi_plugin_fieldconstraints_actionrules';
+    $filters = 'glpi_plugin_fieldconstraints_rulefilters';
+
+    if (!$DB->fieldExists($rules, 'filter_logic')) {
+        $DB->doQuery("ALTER TABLE `$rules` ADD `filter_logic` varchar(3) NOT NULL DEFAULT 'AND' AFTER `is_active`");
+    }
+
+    if (!$DB->fieldExists($rules, 'itilcategories')) {
+        return;
+    }
+
+    $now = date('Y-m-d H:i:s');
+    foreach ($DB->request(['FROM' => $rules]) as $row) {
+        $rule_id = (int) $row['id'];
+
+        // Stored by 1.0 as a JSON list; a category covered its subcategories.
+        $categories = json_decode((string) $row['itilcategories'], true);
+        $categories = is_array($categories) ? array_values(array_unique(array_filter(array_map('intval', $categories)))) : [];
+        if ($categories !== []) {
+            $DB->insert($filters, [
+                'plugin_fieldconstraints_actionrules_id' => $rule_id,
+                'criterion'                              => 'itilcategories_id',
+                'operator'                               => 'under',
+                'filter_values'                          => json_encode($categories),
+                'date_creation'                          => $now,
+                'date_mod'                               => $now,
+            ]);
+        }
+
+        // Ignored by 1.0 for changes and problems.
+        $type = (int) ($row['ticket_type'] ?? 0);
+        if ($type > 0 && $row['itemtype'] === 'Ticket') {
+            $DB->insert($filters, [
+                'plugin_fieldconstraints_actionrules_id' => $rule_id,
+                'criterion'                              => 'type',
+                'operator'                               => 'equals',
+                'filter_values'                          => json_encode([$type]),
+                'date_creation'                          => $now,
+                'date_mod'                               => $now,
+            ]);
+        }
+    }
+
+    $migration->dropField($rules, 'itilcategories');
+    $migration->dropField($rules, 'ticket_type');
+    $migration->migrationOneTable($rules);
+}
+
 function plugin_fieldconstraints_uninstall(): bool
 {
     global $DB;
@@ -100,6 +176,7 @@ function plugin_fieldconstraints_uninstall(): bool
     $tables = [
         'glpi_plugin_fieldconstraints_actionblocks',
         'glpi_plugin_fieldconstraints_actionrules',
+        'glpi_plugin_fieldconstraints_rulefilters',
         'glpi_plugin_fieldconstraints_dateconstraints',
     ];
     foreach ($tables as $table) {
@@ -112,6 +189,7 @@ function plugin_fieldconstraints_uninstall(): bool
     $itemtypes = [
         'GlpiPlugin\\Fieldconstraints\\ActionBlock',
         'GlpiPlugin\\Fieldconstraints\\ActionRule',
+        'GlpiPlugin\\Fieldconstraints\\RuleFilter',
     ];
     foreach ($itemtypes as $itemtype) {
         if (version_compare(GLPI_VERSION, '11.0', '<')) {

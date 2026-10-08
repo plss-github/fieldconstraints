@@ -8,16 +8,15 @@ use CommonDBChild;
 use CommonGLPI;
 use Dropdown;
 use Html;
-use ITILCategory;
 use Session;
-use Ticket;
 
 /**
- * The rule of an action block for one item: "a <ticket> of <these categories>
- * cannot <solve> while <fields> are empty".
+ * The rule of an action block for one item: "a <ticket> matching <these
+ * filters> cannot <solve> while <fields> are empty".
  *
- * Categories are a list (empty = every category, subcategories included); the
- * message is per rule since it usually names item-specific fields.
+ * Which items it covers is in its "Filters" tab (RuleFilter, combined with
+ * `filter_logic`; no filter = every item); the message is per rule since it
+ * usually names item-specific fields.
  */
 class ActionRule extends CommonDBChild
 {
@@ -47,6 +46,7 @@ class ActionRule extends CommonDBChild
     {
         $tabs = [];
         $this->addDefaultFormTab($tabs);
+        $this->addStandardTab(RuleFilter::class, $tabs, $options);
         $this->addStandardTab(\Log::class, $tabs, $options);
 
         return $tabs;
@@ -74,8 +74,14 @@ class ActionRule extends CommonDBChild
 
     public function post_getEmpty()
     {
-        $this->fields['is_active'] = 1;
-        $this->fields['itemtype']  = 'Ticket';
+        $this->fields['is_active']    = 1;
+        $this->fields['itemtype']     = 'Ticket';
+        $this->fields['filter_logic'] = RuleFilter::LOGIC_AND;
+    }
+
+    public function cleanDBonPurge()
+    {
+        $this->deleteChildrenAndRelationsFromDb([RuleFilter::class]);
     }
 
     // -------------------------------------------------------------- decoding
@@ -92,33 +98,6 @@ class ActionRule extends CommonDBChild
         $keys = json_decode(Compat::plain($stored), true);
 
         return is_array($keys) ? array_values(array_filter($keys, 'is_string')) : [];
-    }
-
-    /**
-     * @return int[] empty = every category
-     */
-    public static function decodeCategories(mixed $stored): array
-    {
-        if (!is_string($stored) || $stored === '') {
-            return [];
-        }
-
-        $ids = json_decode(Compat::plain($stored), true);
-
-        return is_array($ids) ? array_values(array_filter(array_map('intval', $ids))) : [];
-    }
-
-    public static function describeCategories(mixed $stored): string
-    {
-        $ids = self::decodeCategories($stored);
-        if ($ids === []) {
-            return __('All categories', 'fieldconstraints');
-        }
-
-        return implode(', ', array_map(
-            static fn (int $id): string => Compat::plain((string) Dropdown::getDropdownName(ITILCategory::getTable(), $id)),
-            $ids
-        ));
     }
 
     public function getBlockStatus(): int
@@ -162,14 +141,9 @@ class ActionRule extends CommonDBChild
         }
         $input['itemtype'] = $itemtype;
 
-        if (array_key_exists('itilcategories', $input) || isset($input['_itilcategories_posted'])) {
-            $ids = $input['itilcategories'] ?? [];
-            if (is_string($ids)) {
-                $ids = $ids === '' ? [] : (json_decode(Compat::plain($ids), true) ?? [$ids]);
-            }
-            $input['itilcategories'] = json_encode(array_values(array_unique(array_filter(array_map('intval', (array) $ids)))));
+        if (array_key_exists('filter_logic', $input)) {
+            $input['filter_logic'] = RuleFilter::normalizeLogic($input['filter_logic']);
         }
-        unset($input['_itilcategories_posted']);
 
         if (array_key_exists('required_fields', $input) || isset($input['_required_fields_posted'])) {
             $posted = $input['required_fields'] ?? [];
@@ -210,8 +184,18 @@ class ActionRule extends CommonDBChild
             );
         }
 
-        if ($itemtype !== 'Ticket') {
-            $input['ticket_type'] = 0;
+        // A filter on a criterion the new item lacks (ticket type on a change)
+        // would never match.
+        if (!$is_add && $itemtype !== ($this->fields['itemtype'] ?? $itemtype)) {
+            $criteria = RuleFilter::getCriteria($itemtype);
+            foreach (RuleFilter::getForRules([$this->getID()])[$this->getID()] ?? [] as $filter) {
+                if (!isset($criteria[$filter['criterion']])) {
+                    return self::refuse(sprintf(
+                        __('The filter "%s" does not apply to this item: remove it first.', 'fieldconstraints'),
+                        RuleFilter::describe($filter)
+                    ));
+                }
+            }
         }
 
         return $input;
@@ -268,7 +252,7 @@ class ActionRule extends CommonDBChild
 
         echo '<table class="table table-hover card-table"><thead><tr>'
             . '<th>' . Compat::escape(__('Item', 'fieldconstraints')) . '</th>'
-            . '<th>' . Compat::escape(__('Categories', 'fieldconstraints')) . '</th>'
+            . '<th>' . Compat::escape(RuleFilter::getTypeName(2)) . '</th>'
             . '<th>' . Compat::escape(__('Required fields', 'fieldconstraints')) . '</th>'
             . '<th class="text-center">' . Compat::escape(__('Active', 'fieldconstraints')) . '</th>'
             . '</tr></thead><tbody>';
@@ -278,18 +262,17 @@ class ActionRule extends CommonDBChild
                 . Compat::escape(__('No item rule yet: this block blocks nothing.', 'fieldconstraints')) . '</td></tr>';
         }
 
-        foreach ($iterator as $row) {
+        $rows    = iterator_to_array($iterator, false);
+        $filters = RuleFilter::getForRules(array_column($rows, 'id'));
+        foreach ($rows as $row) {
             $itemtype = (string) $row['itemtype'];
             $label    = in_array($itemtype, ActionBlock::ITEMTYPES, true) ? $itemtype::getTypeName(1) : $itemtype;
-            if ($itemtype === 'Ticket' && (int) $row['ticket_type'] > 0) {
-                $label .= ' (' . Ticket::getTicketTypeName((int) $row['ticket_type']) . ')';
-            }
             $fields = array_map([FieldCatalog::class, 'describe'], self::decodeRequiredFields($row['required_fields']));
             $link   = self::getFormURLWithID((int) $row['id']);
 
             echo '<tr>'
                 . '<td><a href="' . Compat::escape($link) . '">' . Compat::escape($label) . '</a></td>'
-                . '<td>' . Compat::escape(self::describeCategories($row['itilcategories'])) . '</td>'
+                . '<td>' . Compat::escape(RuleFilter::summarize($filters[(int) $row['id']] ?? [], (string) $row['filter_logic'])) . '</td>'
                 . '<td>' . implode('<br>', array_map([Compat::class, 'escape'], $fields)) . '</td>'
                 . '<td class="text-center">' . Compat::escape(Dropdown::getYesNo($row['is_active'])) . '</td>'
                 . '</tr>';
@@ -326,25 +309,21 @@ class ActionRule extends CommonDBChild
             $render();
             return (string) ob_get_clean();
         };
-        $categories_html = $capture(function () use ($block) {
-            echo Html::hidden('_itilcategories_posted', ['value' => 1]);
-            Dropdown::show(ITILCategory::class, [
-                // Dropdown::show() does not add the brackets a multiple select needs.
-                'name'     => 'itilcategories[]',
-                'multiple' => true,
-                'value'    => self::decodeCategories($this->fields['itilcategories'] ?? null),
-                'entity'   => $block->fields['entities_id'],
-                'width'    => '100%',
-            ]);
-        });
-        $ticket_type_html = $capture(function () {
-            Ticket::dropdownType('ticket_type', [
-                'value'               => (int) ($this->fields['ticket_type'] ?? 0),
-                'toadd'               => [0 => Compat::dropdownLabel(__('All types', 'fieldconstraints'))],
-                'display_emptychoice' => false,
-                'width'               => '100%',
-            ]);
-        });
+        // Filters are edited in their own tab; the form only recalls them.
+        if ($this->isNewItem()) {
+            $filters_html = '<span class="text-muted">'
+                . Compat::escape(__('Save the rule, then add filters in the "Filters" tab. No filter = every item.', 'fieldconstraints'))
+                . '</span>';
+        } else {
+            $summary = RuleFilter::summarize(
+                RuleFilter::getForRules([$this->getID()])[$this->getID()] ?? [],
+                (string) ($this->fields['filter_logic'] ?? RuleFilter::LOGIC_AND)
+            );
+            $tab_url = self::getFormURLWithID($this->getID()) . '&forcetab=' . urlencode(RuleFilter::class . '$1');
+            $filters_html = '<span>' . Compat::escape($summary) . '</span>'
+                . ' <a class="ms-2" href="' . Compat::escape($tab_url) . '"><i class="ti ti-filter me-1"></i>'
+                . Compat::escape(__('Edit filters', 'fieldconstraints')) . '</a>';
+        }
         $required_html = $capture(function () use ($rand, $status) {
             echo '<div id="fieldconstraints_fields_' . $rand . '" data-fieldconstraints-fields>';
             self::showFieldsDropdown(
@@ -375,8 +354,7 @@ class ActionRule extends CommonDBChild
             'block_label'      => ActionBlock::getTypeName(1),
             'block_link'       => $block_link,
             'itemtypes'        => $items,
-            'categories_html'  => $categories_html,
-            'ticket_type_html' => $ticket_type_html,
+            'filters_html'     => $filters_html,
             'required_html'    => $required_html,
             'refresh_script'   => $refresh_script,
             // Plain text: Twig escapes it (GLPI 10 stores it HTML-encoded).
@@ -384,10 +362,7 @@ class ActionRule extends CommonDBChild
             'comment'          => Compat::plain($this->fields['comment'] ?? ''),
             'labels'           => [
                 'item'              => __('Item', 'fieldconstraints'),
-                'categories'        => __('Categories', 'fieldconstraints'),
-                'categories_help'   => __('Empty = every category. A category includes its subcategories.', 'fieldconstraints'),
-                'ticket_type'       => __('Ticket type', 'fieldconstraints'),
-                'ticket_type_help'  => __('Ignored for changes and problems.', 'fieldconstraints'),
+                'filters'           => RuleFilter::getTypeName(2),
                 'active'            => __('Active', 'fieldconstraints'),
                 'message'           => __('Custom message', 'fieldconstraints'),
                 'required'          => __('Fields required to allow the action', 'fieldconstraints'),

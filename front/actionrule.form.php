@@ -43,6 +43,12 @@ Html::header(
     ActionBlock::class
 );
 
+// "Edit filters" link and the return from a deleted filter open that tab: core
+// cannot tell the itemtype from a plugin's URL, so it ignores `forcetab` here.
+if (isset($_GET['forcetab'])) {
+    Session::setActiveTab(ActionRule::class, (string) $_GET['forcetab']);
+}
+
 $id = (int) ($_GET['id'] ?? -1);
 if ($id > 0) {
     $rule->check($id, READ);

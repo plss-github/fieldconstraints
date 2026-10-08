@@ -24,8 +24,7 @@ As regras são organizadas em **blocos por ação**:
 - **Bloco**: nome, **ação** (*Solucionar*, *Fechar*, *Pendenciar* ou outra mudança de status), entidade
   (+ subentidades) e ativo. A ação fica fixa enquanto o bloco tiver regras.
 - **Regras por item** (aba do bloco): uma ou mais por item (Chamado, Mudança, Problema), cada uma com:
-  - **Categorias**: seleção múltipla; **vazio = todas**. Uma categoria inclui suas subcategorias.
-  - **Tipo de chamado** (só chamados).
+  - **Filtros** (aba própria da regra, ver abaixo): a quais itens a regra vale; **sem filtro = todos**.
   - **Campos exigidos**: a lista depende do item e da ação do bloco.
     - *Campos do item*: categoria, localização, origem, descrição, tempo para solução, duração total, requerente,
       grupo requerente, observador, técnico/grupo/fornecedor atribuído, item associado, ao menos uma tarefa, todas
@@ -35,6 +34,37 @@ As regras são organizadas em **blocos por ação**:
   - **Mensagem personalizada**: substitui o texto padrão; a lista do que falta é sempre mostrada.
 
 Várias regras podem valer para a mesma ação e item: todas são avaliadas e cada uma mostra sua mensagem.
+
+### Filtros
+
+Aba **Filtros** da regra por item (o formulário da regra só mostra o resumo, com o link para a aba). No topo, a
+combinação: **todos os filtros atendidos (E)** ou **ao menos um atendido (OU)**. Abaixo, a lista de linhas
+*critério - operador - valores*, ex.: *Se Categoria está sob [Rede, Impressoras] E Grupo do usuário
+não é Service Desk*. Cada linha pode ser aberta para editar ou excluída na própria lista.
+
+| Grupo | Critérios |
+|---|---|
+| Item | Entidade, Categoria, Tipo de chamado¹, Origem da requisição¹, Localização, Urgência, Impacto, Prioridade |
+| Atores | Requerente, Grupo requerente, Técnico atribuído, Grupo atribuído |
+| Usuário que executa a ação | Usuário, Grupo do usuário, Perfil do usuário (perfil ativo) |
+
+¹ Só chamados.
+
+| Operador | Vale quando |
+|---|---|
+| **é** / **não é** | o valor (um só) é / não é o do item |
+| **está em** / **não está em** | algum / nenhum valor do item está na lista |
+| **está sob** / **não está sob** | como *está em* / *não está em*, mas cada valor da lista cobre também tudo abaixo dele na árvore (categoria, entidade, localização, grupo): *Categoria está sob [Rede]* pega Rede, Rede > Wi-Fi, Rede > Wi-Fi > Visitantes... |
+
+Atores e grupos do usuário podem ser vários: *Grupo requerente é X* vale se X for **um** dos grupos requerentes.
+Um item sem o valor (sem categoria, sem técnico) nunca atende *é*/*está em* e sempre atende *não é*/*não está em*.
+O que é avaliado é o item como vai ficar depois do salvamento (mudar a categoria e solucionar no mesmo envio usa a
+categoria nova). Sem sessão (cron de fechamento automático) não há usuário: os critérios de *Usuário que executa a
+ação* não são atendidos com *é*/*está em*.
+
+A entidade do **bloco** continua sendo o primeiro recorte; o filtro de entidade serve para refinar dentro dele (ex.:
+excluir uma subentidade). Um filtro com critério que o item da regra não tem (tipo de chamado numa mudança) impede a
+troca do item da regra até ser removido.
 
 ### Seletor visual
 
@@ -120,8 +150,13 @@ Depois de `make update-files`, rode `php bin/console cache:clear` no container: 
 compilados (`templates/`) e não percebe a alteração sozinho. O JS não precisa disso no GLPI 11 (a URL leva a data do
 arquivo); no GLPI 10, suba a versão do plugin a cada release.
 
-Desinstalar remove as tabelas `glpi_plugin_fieldconstraints_actionblocks`, `glpi_plugin_fieldconstraints_actionrules` e
-`glpi_plugin_fieldconstraints_dateconstraints`.
+Desinstalar remove as tabelas `glpi_plugin_fieldconstraints_actionblocks`, `glpi_plugin_fieldconstraints_actionrules`,
+`glpi_plugin_fieldconstraints_rulefilters` e `glpi_plugin_fieldconstraints_dateconstraints`.
+
+### Atualização da 1.0
+
+As **categorias** e o **tipo de chamado** das regras viram filtros com o mesmo efeito (*Categoria está sob [...]* e *Tipo de chamado é ...*, combinados com E), e as colunas antigas são removidas. Basta atualizar
+o plugin (Configurar > Plugins ou `php bin/console plugin:install fieldconstraints -f`).
 
 ## Migração do limiterforchange
 

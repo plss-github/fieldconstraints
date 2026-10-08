@@ -16,8 +16,9 @@ use GlpiPlugin\Fieldconstraints\DateConstraint;
 use GlpiPlugin\Fieldconstraints\DateEnforcer;
 use GlpiPlugin\Fieldconstraints\Enforcer;
 use GlpiPlugin\Fieldconstraints\FormHints;
+use GlpiPlugin\Fieldconstraints\RuleFilter;
 
-define('PLUGIN_FIELDCONSTRAINTS_VERSION', '1.0.0');
+define('PLUGIN_FIELDCONSTRAINTS_VERSION', '1.1.0');
 
 // Plugin::checkGlpiVersion() treats `max` as exclusive: every 10.0.x and 11.0.x.
 define('PLUGIN_FIELDCONSTRAINTS_MIN_GLPI', '10.0.0');
@@ -61,6 +62,7 @@ function plugin_init_fieldconstraints(): void
 
     Plugin::registerClass(ActionBlock::class);
     Plugin::registerClass(ActionRule::class);
+    Plugin::registerClass(RuleFilter::class);
 
     // "Date constraints" tab on Fields containers and on forms. Guarded: a
     // throw here silently deactivates the plugin, and the database may not be

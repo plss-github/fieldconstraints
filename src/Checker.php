@@ -33,7 +33,7 @@ final class Checker
         $state = array_merge($item->fields, self::scalarInput($input));
 
         $violations = [];
-        foreach (self::findRules($item, $state, $statuses) as $rule) {
+        foreach (self::findRules($item, $state, $statuses, $input) as $rule) {
             $missing = [];
             foreach (ActionRule::decodeRequiredFields($rule['required_fields'] ?? null) as $key) {
                 if (!self::isFilled($item, $state, $input, $solution_input, $key)) {
@@ -61,15 +61,16 @@ final class Checker
 
     /**
      * Active item rules of this itemtype, in active blocks of these actions
-     * (null = any), whose scope covers the object.
+     * (null = any), whose scope covers the object: the block's entity, then the
+     * rule's filters (RuleFilter).
      *
      * Each rule comes merged with its block: `status`, `name` (the block's),
      * `entities_id`, `is_recursive` from the block; `message`, `required_fields`,
-     * `itilcategories`, `ticket_type` from the rule.
+     * `filter_logic` from the rule.
      *
      * @return array<int, array>
      */
-    private static function findRules(CommonITILObject $item, array $state, ?array $statuses): array
+    private static function findRules(CommonITILObject $item, array $state, ?array $statuses, array $input = []): array
     {
         global $DB;
 
@@ -91,7 +92,7 @@ final class Checker
 
         $iterator = $DB->request([
             'SELECT'     => [
-                'r.id', 'r.itemtype', 'r.itilcategories', 'r.ticket_type', 'r.required_fields', 'r.message',
+                'r.id', 'r.itemtype', 'r.filter_logic', 'r.required_fields', 'r.message',
                 'b.id AS block_id', 'b.name', 'b.status', 'b.entities_id', 'b.is_recursive',
             ],
             'FROM'       => ActionRule::getTable() . ' AS r',
@@ -102,34 +103,25 @@ final class Checker
             'ORDER'      => ['b.id', 'r.id'],
         ]);
 
-        $entity     = (int) ($state['entities_id'] ?? 0);
-        $ancestors  = array_map('intval', array_values(getAncestorsOf('glpi_entities', $entity)));
-        $category   = (int) ($state['itilcategories_id'] ?? 0);
-        $categories = $category > 0
-            ? array_merge([$category], array_map('intval', array_values(getAncestorsOf('glpi_itilcategories', $category))))
-            : [];
+        $entity    = (int) ($state['entities_id'] ?? 0);
+        $ancestors = array_map('intval', array_values(getAncestorsOf('glpi_entities', $entity)));
 
-        $rules = [];
+        $candidates = [];
         foreach ($iterator as $rule) {
             $rule_entity = (int) $rule['entities_id'];
             $in_entity   = $rule_entity === $entity
                 || ($rule['is_recursive'] && in_array($rule_entity, $ancestors, true));
-            if (!$in_entity) {
-                continue;
+            if ($in_entity) {
+                $candidates[] = $rule;
             }
+        }
 
-            // No category = every category; a category covers its subcategories.
-            $rule_categories = ActionRule::decodeCategories($rule['itilcategories']);
-            if ($rule_categories !== [] && array_intersect($rule_categories, $categories) === []) {
-                continue;
+        $filters = RuleFilter::getForRules(array_column($candidates, 'id'));
+        $rules   = [];
+        foreach ($candidates as $rule) {
+            if (RuleFilter::matchAll($filters[(int) $rule['id']] ?? [], (string) $rule['filter_logic'], $item, $state, $input)) {
+                $rules[] = $rule;
             }
-
-            $rule_type = (int) $rule['ticket_type'];
-            if ($rule_type > 0 && $item->getType() === 'Ticket' && $rule_type !== (int) ($state['type'] ?? 0)) {
-                continue;
-            }
-
-            $rules[] = $rule;
         }
 
         return $rules;
