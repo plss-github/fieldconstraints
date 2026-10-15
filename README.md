@@ -127,8 +127,9 @@ O que é avaliado é o estado **depois** do salvamento: preencher a categoria (o
 principal) e mudar o status no mesmo envio é aceito. Nas mudanças diretas de status para Solucionado/Fechado, os
 campos de solução são conferidos na última solução não recusada.
 
-Regras do campo adicional: lista suspensa vazia, "Sim/Não" em **Não**, data vazia e texto em branco contam como
-não preenchidos. Campo apagado/desativado, ou plugin Fields desativado, não bloqueia nada.
+Regras do campo adicional: lista suspensa vazia, data vazia e texto em branco contam como não preenchidos.
+"Sim/Não" conta como preenchido tanto em **Sim** quanto em **Não**; só falta quando não há valor gravado.
+Campo apagado/desativado, ou plugin Fields desativado, não bloqueia nada.
 
 ## Limitações
 

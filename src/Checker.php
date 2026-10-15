@@ -320,8 +320,13 @@ final class Checker
             return !is_array($decoded) || self::isEmptyFieldValue($decoded, $field);
         }
 
-        // Dropdowns store an id, "yes/no" stores 0/1: a required yes/no must be "yes".
-        if ($type === 'yesno' || $type === 'glpi_item' || str_starts_with($type, 'dropdown')) {
+        // "Yes/no" stores 0/1 and both are answers: only a missing value is empty.
+        if ($type === 'yesno') {
+            return false;
+        }
+
+        // Dropdowns store an id: 0 means nothing selected.
+        if ($type === 'glpi_item' || str_starts_with($type, 'dropdown')) {
             return (int) $value <= 0;
         }
 
